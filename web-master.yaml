@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-master
+  labels:
+    app: nginx-master
+spec:
+  ports:
+    - port: 80
+      name: web
+    - name: jmeter-port
+      port: 1099
+      targetPort: 1099
+    - name: ssh
+      port: 22
+      targetPort: 22
+    - name: epmd
+      port: 4369
+      targetPort: 4369
+    - name: webstatus
+      port: 8091
+      targetPort: 8091
+  clusterIP: None
+  selector:
+    app: nginx-master
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web-master
+spec:
+  serviceName: "nginx-master"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-master
+  template:
+    metadata:
+      labels:
+        app: nginx-master
+    spec:
+      containers:
+        - name: nginx-master
+          image: bartleonid/jmeter
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+          # command: ["bash"]
+          # args: ["-c", "ping nginx.default.svc.cluster.local"]
+          # command: ["bash"]
+          # args:
+          #   [
+          #     "-c",
+          #     "/opt/apache-jmeter-5.1/bin/jmeter -n -t /opt/apache-jmeter-5.1/bin/jmx/test.jmx -R nginx.default.svc.cluster.local",
+          #   ]
+  volumeClaimTemplates:
+    - metadata:
+        name: www
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
