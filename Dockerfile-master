@@ -28,10 +28,5 @@ COPY ./test.jmx /opt/apache-jmeter-5.1/bin/jmx/test.jmx
 EXPOSE 1099
 EXPOSE 80
 
-# ENTRYPOINT ${JMETER_HOME}/bin/jmeter-server \
-#     -Dserver.rmi.localport=50000 \
-#     -Dserver_port=1099 \
-#     -Jserver.rmi.ssl.disable=true
-
 RUN chmod +x ./jmeter.sh
 CMD [ "./jmeter.sh" ]
